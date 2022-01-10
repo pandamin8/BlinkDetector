@@ -9,6 +9,8 @@ plotY = LivePlot(640, 360, [20, 50], invert=True)
 
 idList = [22, 23, 24, 26, 110, 157, 158, 159, 160, 161, 130, 243]
 ratioList = []
+counter = 0
+blinked = 0
 
 while True:
 
@@ -20,8 +22,8 @@ while True:
 
     if faces:
         face = faces[0]
-#        for id in idList:
-#            cv2.circle(img, face[id], 3, (255, 0, 255), cv2.FILLED)
+        for id in idList:
+            cv2.circle(img, face[id], 3, (255, 0, 255), cv2.FILLED)
         leftUpEye = face[159]
         leftDownEye = face[23]
         leftLeftEye = face[130]
@@ -29,8 +31,8 @@ while True:
 
         lengthVer, _ = detector.findDistance(leftDownEye, leftUpEye)
         lengthHor, _ = detector.findDistance(leftLeftEye, leftRightEye)
-#        cv2.line(img, leftUpEye, leftDownEye, (0, 200, 0))
-#        cv2.line(img, leftLeftEye, leftRightEye, (0, 200, 0))
+        cv2.line(img, leftUpEye, leftDownEye, (0, 200, 0))
+        cv2.line(img, leftLeftEye, leftRightEye, (0, 200, 0))
 
         ratio = (lengthVer / lengthHor) * 100
         ratioList.append(ratio)
@@ -40,12 +42,20 @@ while True:
 
         ratioAvg = sum(ratioList) / len(ratioList)
 
-        if ratioAvg < 33:
+        if ratioAvg < 32:
             imgPlot = plotY.update(ratioAvg, (0, 200, 0))
+            counter += 1
+            print(blinked)
+
+            if counter == 10:
+                counter = 0
+
+            if counter == 1:
+                blinked += 1
+
         else:
             imgPlot = plotY.update(ratioAvg, (255, 0, 255))
 
-        print(ratioAvg)
         img = cv2.resize(img, (640, 360))
         imageStack = cvzone.stackImages([img, imgPlot], 2, 1)
     else:
